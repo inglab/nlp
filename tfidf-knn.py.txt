@@ -1,0 +1,47 @@
+import random
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+
+size = 2000
+
+with open('lalaland.txt') as f:
+    raw = f.read().lower()
+
+# sentence_tokens = sent_tokenize(raw) # 2000/500
+# data1 = sentence_tokens[:size]
+data1 = raw[:size]
+# data1 = raw
+# label1 = np.full(size,"lala")
+
+# vectorizer = TfidfVectorizer(token_pattern=u"(?u)\\b\\w+\\b", min_df=1)
+vectorizer = TfidfVectorizer(token_pattern=u"(?u)\\b\\w+\\b",max_df=0.5, max_features=10000,min_df=1, stop_words='english',use_idf=True)
+# vtr_data1 = vectorizer.fit_transform(data1)
+
+with open('raiders.txt') as f:
+    raw = f.read().lower()
+# sentence_tokens = sent_tokenize(raw) # 2400/600
+# data2 = sentence_tokens[:size]
+data2 = raw[:size]
+# data2 = raw
+# label2 = np.full(size,"raiders")
+data = [data1, data2]
+
+label = ['lala','raiders']
+
+vtr_data = vectorizer.fit_transform(data)
+
+knn_tfidf = KNeighborsClassifier(n_neighbors=1, algorithm='brute', metric='cosine')
+
+knn_tfidf.fit(vtr_data, label)
+
+pred_data = ['cafe jazz la holywood', #lala
+            'professor treasure cave', #radiers
+            'An amphibian plane sits in the water beneath a green cliff', #radiers
+            'CITY OF STARS', #lala
+             'Marion looks at the wall, which looks like all the rest to her.' #radiers
+            ]
+
+for pred_sentence in pred_data:
+    pred_vec = vectorizer.transform([pred_sentence.lower()])
+    print(knn_tfidf.predict(pred_vec))
